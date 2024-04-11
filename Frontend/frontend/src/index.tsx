@@ -9,6 +9,8 @@ import Login from "./routes/Login";
 import Register from "./routes/Register";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
+import Home from "./routes/Home";
+import PrivateRoute from "./components/PrivateRoute";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -88,6 +90,10 @@ const router = createBrowserRouter([
     path: "register",
     element: <Register />,
   },
+  {
+    path: "home",
+    element: <PrivateRoute><Home /></PrivateRoute>,
+  }
 ]);
 
 root.render(

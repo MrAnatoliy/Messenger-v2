@@ -10,18 +10,29 @@ import {
 } from "@mui/material";
 import {
   IAuthRequest,
+  IAuthResponse,
+  authSuccess,
   authenticate,
   selectLoading,
   selectMessage,
+  selectUser,
 } from "../store/authSlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import Cookies from "universal-cookie";
 
 const Login = () => {
+
+  const cookies = new Cookies()
+
+  const navigate = useNavigate()
+
   const dispatch = useAppDispatch();
 
-  const loading = useAppSelector(selectLoading);
-  const message = useAppSelector(selectMessage);
+  const user = useAppSelector(selectUser)
+  const loading = useAppSelector(selectLoading)
+  const message = useAppSelector(selectMessage)
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -45,12 +56,38 @@ const Login = () => {
       } else setPasswordMessage("");
     },
     [loading, message]
-  );
+  );  
+
+  const loadDataOnlyOnce = () => {
+    const cookieToken = cookies.get('token')
+    const cookieAuth = cookies.get('authorities')
+
+    if(cookieToken && cookieAuth){
+      const data : IAuthResponse = {
+        token: cookieToken,
+        message: "Authenticate from cookies",
+        roles: cookieAuth,
+      }
+
+      dispatch(authSuccess(data))
+    }
+  }
+
+  useEffect(() => {
+    loadDataOnlyOnce();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[])
 
   useEffect(() => {
     loginValidation(username);
     passwordValidation(password);
   }, [username, password, loading, passwordValidation]);
+
+  useEffect(() => {
+    if(user?.token && loading === 'succeeded'){
+      navigate("/home")
+    }
+  })
 
   return (
     <Page enableAuthButtons={false}>
