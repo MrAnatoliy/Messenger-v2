@@ -1,6 +1,7 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "./store";
 import axios from "axios";
+import Cookies from "universal-cookie";
 
 export interface IAuthSlice {
     user: {
@@ -90,6 +91,9 @@ export const authenticate = createAsyncThunk(
             const data: IAuthResponse = response.data;
             if (data.token) {
                 dispatch(authSuccess(data));
+                const cookies = new Cookies()
+                cookies.set("token",data.token)
+                cookies.set("authorities",data.roles)
             } else {
                 dispatch(authFail(data));
             }
