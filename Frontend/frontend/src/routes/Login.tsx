@@ -60,11 +60,11 @@ const Login = () => {
           margin="normal"
           variant="outlined"
           label= "password"
+          helperText= {loading === 'failed' ? message : ""}
           onChange={(e) => {
             setPassword(e.target.value);
           }}
         />
-        {loading === 'failed' ? <Typography color="error">{message}</Typography> : ""}
         <Button
           variant="contained"
           sx={{
