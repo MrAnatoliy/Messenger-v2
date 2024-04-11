@@ -7,6 +7,8 @@ import Error from "./error/Error";
 import Welcome from "./routes/Welcome";
 import Login from "./routes/Login";
 import Register from "./routes/Register";
+import { Provider } from "react-redux";
+import { store } from "./store/store";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -47,23 +49,26 @@ const theme = createTheme({
     },
     MuiTextField: {
       styleOverrides: {
-        root: {
-          '& .MuiOutlinedInput-root': {
-            '& fieldset': {
-              borderWidth: '2px',
-              borderColor: '#47b5ff', // Default border color
+        root: ({ theme }) => ({
+          "& .MuiOutlinedInput-root": {
+            "& fieldset": {
+              borderWidth: "2px",
+              borderColor: theme.palette.primary.main,
             },
-            '&:hover fieldset': {
-              borderColor: '#b5defe', // Default hover color
+            "&:hover fieldset": {
+              borderColor: theme.palette.primary.light,
             },
-            '&.Mui-error:hover fieldset': {
-              borderColor: '#ff3333', // Error color on hover
+            "&.Mui-error:hover fieldset": {
+              borderColor: theme.palette.error.main,
             },
-            '& input': {
-              color: '#47b5ff', // Default text color
+            "& input": {
+              color: theme.palette.primary.main,
             },
+            "&.Mui-error input": {
+              color: theme.palette.error.main,
+            }
           },
-        },
+        }),
       },
     },
   },
@@ -88,7 +93,9 @@ const router = createBrowserRouter([
 root.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
-      <RouterProvider router={router} />
+      <Provider store={store}>
+        <RouterProvider router={router} />
+      </Provider>
     </ThemeProvider>
   </React.StrictMode>
 );

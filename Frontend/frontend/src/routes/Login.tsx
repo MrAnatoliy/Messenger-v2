@@ -1,8 +1,23 @@
-import React from "react";
+import { useState } from "react";
 import Page from "../components/Page";
 import { Box, Button, TextField, Typography } from "@mui/material";
+import {
+  IAuthRequest,
+  authenticate,
+  selectLoading,
+  selectMessage,
+} from "../store/authSlice";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
 
 const Login = () => {
+  const dispatch = useAppDispatch();
+
+  const loading = useAppSelector(selectLoading)
+  const message = useAppSelector(selectMessage)
+
+  const [username , setUsername] = useState("")
+  const [password, setPassword] = useState("")
+
   return (
     <Page enableAuthButtons={false}>
       <Box
@@ -32,16 +47,24 @@ const Login = () => {
           margin="normal"
           variant="outlined"
           label="username"
+          onChange={(e) => {
+            setUsername(e.target.value);
+          }}
         />
         <TextField
+          error= {loading === 'failed'}
           fullWidth
           sx={{
             width: "80%",
           }}
           margin="normal"
           variant="outlined"
-          label="password"
+          label= "password"
+          onChange={(e) => {
+            setPassword(e.target.value);
+          }}
         />
+        {loading === 'failed' ? <Typography color="error">{message}</Typography> : ""}
         <Button
           variant="contained"
           sx={{
@@ -49,6 +72,13 @@ const Login = () => {
             marginBottom: 5,
             width: "150px",
             textTransform: "none",
+          }}
+          onClick={() => {
+            const user: IAuthRequest = {
+              email: username,
+              password: password,
+            };
+            dispatch(authenticate(user));
           }}
         >
           Get in

@@ -33,7 +33,7 @@ const Register = () => {
           variant="outlined"
           label="email"
         />
-                <TextField
+        <TextField
           fullWidth
           sx={{
             width: "80%",
@@ -51,7 +51,7 @@ const Register = () => {
           variant="outlined"
           label="password"
         />
-                <TextField
+        <TextField
           fullWidth
           sx={{
             width: "80%",
