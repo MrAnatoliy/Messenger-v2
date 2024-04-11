@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import { ROLE } from "../util/roles";
+import { AccessDenied } from "../error/AccessDenied";
  
 const PrivateRoute = ({ 
   children,
@@ -24,7 +25,7 @@ const PrivateRoute = ({
   const userHasRequiredRole = user && user.authorities.includes(role.toString()) ? true : false
  
   if (isLoggedIn && !userHasRequiredRole){
-    return (<h1>ACCESS DENIED</h1>)
+    return <AccessDenied requiredRole={role}/>
   }
 
   return children;

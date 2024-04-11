@@ -24,6 +24,7 @@ const Error = () => {
       <Typography
         sx={{
           color: "primary.contrastText",
+          fontWeight: 700,
         }}
         variant="h1"
       >
@@ -32,6 +33,7 @@ const Error = () => {
       <Typography
         sx={{
           color: "primary.contrastText",
+          fontWeight: 300,
         }}
         variant="h3"
       >
