@@ -11,6 +11,7 @@ import { Provider } from "react-redux";
 import { store } from "./store/store";
 import Home from "./routes/Home";
 import PrivateRoute from "./components/PrivateRoute";
+import { ROLE } from "./util/roles";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -92,7 +93,7 @@ const router = createBrowserRouter([
   },
   {
     path: "home",
-    element: <PrivateRoute><Home /></PrivateRoute>,
+    element: <PrivateRoute role={ROLE.User}><Home /></PrivateRoute>,
   }
 ]);
 
