@@ -12,12 +12,14 @@ import { store } from "./store/store";
 import Home from "./routes/Home";
 import PrivateRoute from "./components/PrivateRoute";
 import { ROLE } from "./util/roles";
+import { light } from "@mui/material/styles/createPalette";
+import { DoNotDisturb } from "@mui/icons-material";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 
-const theme = createTheme({
+let theme = createTheme({
   palette: {
     primary: {
       light: "#b5defe",
@@ -76,6 +78,35 @@ const theme = createTheme({
     },
   },
 });
+
+theme = createTheme(theme, {
+  palette: {
+    online: theme.palette.augmentColor({
+      color: {
+        main: "#49ff50",
+      },
+      name: "online",
+    }),
+    doNotDisturb: theme.palette.augmentColor({
+      color: {
+        main: "#ff5f49",
+      },
+      name: "doNotDisturb",
+    }),
+    away: theme.palette.augmentColor({
+      color: {
+        main: "#ffed49",
+      },
+      name: "away",
+    }),
+    invisible: theme.palette.augmentColor({
+      color: {
+        main: "#C0D5DC",
+      },
+      name: "invisible",
+    }),
+  },
+})
 
 const router = createBrowserRouter([
   {

@@ -13,6 +13,8 @@ import {
   IAuthResponse,
   authSuccess,
   authenticate,
+  clearMessage,
+  resetLoading,
   selectLoading,
   selectMessage,
   selectUser,
@@ -21,6 +23,7 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
+import { LoadingButton } from "@mui/lab";
 
 const Login = () => {
 
@@ -39,21 +42,32 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword(!showPassword);
 
-  const [loginMessage, setLoginMessage] = useState("");
+  const [loginMessage, setLoginMessage] = useState("")
+  const [allowLogin, setAllowLogin] = useState(false)
   const loginValidation = (textValue: string) => {
     if (textValue.length <= 0) {
+      setAllowLogin(false)
       setLoginMessage("Login cant be empty");
-    } else setLoginMessage("");
+    } else {
+      setAllowLogin(true)
+      setLoginMessage("")
+    }
   };
 
-  const [passwordMessage, setPasswordMessage] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState("")
+  const [allowPassword, setAllowPassword] = useState(false)
   const passwordValidation = useCallback(
     (textValue: string) => {
       if (textValue.length <= 0) {
+        setAllowPassword(false)
         setPasswordMessage("Password cant be empty");
       } else if (loading === "failed") {
+        setAllowPassword(true)
         setPasswordMessage(message || "Server error");
-      } else setPasswordMessage("");
+      } else {
+        setAllowPassword(true)
+        setPasswordMessage("")
+      }
     },
     [loading, message]
   );  
@@ -68,7 +82,7 @@ const Login = () => {
         message: "Authenticate from cookies",
         roles: cookieAuth,
       }
-
+      window.history.pushState({}, "", "/")
       dispatch(authSuccess(data))
     }
   }
@@ -136,6 +150,7 @@ const Login = () => {
           helperText={passwordMessage}
           onChange={(e) => {
             setPassword(e.target.value);
+            dispatch(resetLoading())
           }}
           type={showPassword ? "text" : "password"}
           InputProps={{
@@ -155,7 +170,8 @@ const Login = () => {
             ),
           }}
         />
-        <Button
+        <LoadingButton
+          loading={loading === 'pending'}
           variant="contained"
           sx={{
             marginTop: 1,
@@ -164,7 +180,7 @@ const Login = () => {
             textTransform: "none",
           }}
           onClick={() => {
-            if (loginMessage.length === 0 && passwordMessage.length === 0) {
+            if (allowLogin && allowPassword) {
               const user: IAuthRequest = {
                 email: username,
                 password: password,
@@ -176,7 +192,7 @@ const Login = () => {
           }}
         >
           Get in
-        </Button>
+        </LoadingButton>
       </Box>
     </Page>
   );

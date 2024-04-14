@@ -60,6 +60,12 @@ export const authSlice = createSlice({
             state.isLoggedIn = false
             state.message = action.payload.message
         },
+        clearMessage: (state) => {
+            state.message = ''
+        },
+        resetLoading: (state) => {
+            state.loading = 'idle'
+        },
     }
 })
 
@@ -67,7 +73,9 @@ export const {
     authentication,
     logout,
     authSuccess,
-    authFail
+    authFail,
+    clearMessage,
+    resetLoading,
 } = authSlice.actions
 
 export const selectUser = (state : RootState) => state.auth.user
