@@ -40,6 +40,8 @@ const ChatInputField = () => {
 const MessageInputField = () => {
   return (
     <TextField
+      autoComplete="off"
+      type="text"
       sx={{
         backgroundColor: "white",
         height: "40px",

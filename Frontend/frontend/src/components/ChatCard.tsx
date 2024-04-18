@@ -37,7 +37,7 @@ const ChatCard = (props: IChatCard) => {
           ? "00"
           : lastMessageDate.getMinutes()) +
         " | " +
-        lastMessageDate.getDay() +
+        lastMessageDate.getDate() +
         " " +
         lastMessageDate.toLocaleString("en", { month: "short" })
       }

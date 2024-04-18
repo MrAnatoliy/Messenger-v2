@@ -69,6 +69,12 @@ const initialState: IChatSlice = {
       messages: [
         {
           sender: gosha,
+          time: new Date(2024, 3, 18, 18, 0, 0, 0).toISOString(),
+          message_status: "read",
+          content: "Ха! Ты пидр :)",
+        },
+        {
+          sender: gosha,
           time: new Date(2024, 3, 17, 18, 0, 0, 0).toISOString(),
           message_status: "read",
           content: "Вообщем давай, вацок, отдыхай",

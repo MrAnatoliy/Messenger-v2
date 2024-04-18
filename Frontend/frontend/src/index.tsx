@@ -125,6 +125,7 @@ const router = createBrowserRouter([
   {
     path: "home",
     element: <PrivateRoute role={ROLE.User}><Home /></PrivateRoute>,
+    //element: <Home />
   }
 ]);
 
