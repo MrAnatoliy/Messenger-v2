@@ -1,22 +1,38 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import default_contact_round from "../static/default_contact_round.png";
-import {
-  Box,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Typography,
-} from "@mui/material";
-import { useAppSelector } from "../store/hooks";
-import { selectUser } from "../store/authSlice";
+import { Box, FormControl, MenuItem, Select, Typography } from "@mui/material";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { selectUser, setUserStatus } from "../store/authSlice";
 import { Circle } from "@mui/icons-material";
+import { STATUS } from "../util/statuses";
 
 const UserCard = () => {
+  const dispatcher = useAppDispatch();
+
   const user = useAppSelector(selectUser);
 
   const [status, setStatus] = useState("online");
+
+  useEffect(() => {
+    let enumStatus: STATUS = STATUS.Online;
+    switch (status) {
+      case "online":
+        enumStatus = STATUS.Online;
+        break;
+      case "doNotDisturb":
+        enumStatus = STATUS.DoNotDisturb;
+        break;
+      case "away":
+        enumStatus = STATUS.Away;
+        break;
+      case "invisible":
+        enumStatus = STATUS.Offline;
+        break;
+      default:
+        break;
+    }
+    dispatcher(setUserStatus(enumStatus));
+  }, [status]);
 
   const statusColor = () => {
     return status + ".main";
@@ -27,7 +43,7 @@ const UserCard = () => {
       sx={{
         display: "flex",
         flexDirection: "row",
-        justifyContent: "space-evenly",
+        justifyContent: "center",
         alignItems: "center",
         width: "100%",
         m: 1,
@@ -38,6 +54,7 @@ const UserCard = () => {
         component="img"
         width={70}
         sx={{
+          marginRight: 2,
           content: `url(${default_contact_round})`,
         }}
         alt="UserPic"
@@ -72,7 +89,7 @@ const UserCard = () => {
                   color: "primary.main",
                 },
                 "& .MuiSelect-icon": {
-                  color: "primary.main"
+                  color: "primary.main",
                 },
                 "& fieldset": {
                   border: "none",

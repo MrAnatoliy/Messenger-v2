@@ -6,14 +6,14 @@ const Home = () => {
   return (
     <>
       <Grid container height="100vh">
-        <Grid item xs={3}>
+        <Grid item xs={4}>
             <Grid height="100%" container direction="column">
                 <Grid display="flex" justifyContent="center" alignItems="center" item xs={2}><UserCard/></Grid>
                 <Grid item xs={9}><ChatBox/></Grid>
                 <Grid item xs={1}>Menu</Grid>
             </Grid>
         </Grid>
-        <Grid item xs={9}>
+        <Grid item xs={8}>
         <Grid height="100%" container direction="column">
                 <Grid item xs={1}>Chat Data</Grid>
                 <Grid item xs={10}>Chat</Grid>
