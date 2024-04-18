@@ -1,25 +1,34 @@
 import { Grid } from "@mui/material";
 import UserCard from "../components/UserCard";
 import ChatBox from "../components/ChatBox";
+import ChatHeader from "../components/ChatHeader";
+import { useAppSelector } from "../store/hooks";
+import { selectActiveChat } from "../store/chatSlice";
+import MenuPanel from "../components/MenuPanel";
+import ChatInputField from "../components/ChatInputField";
 
 const Home = () => {
+
+  const activeChat = useAppSelector(selectActiveChat)
+
   return (
     <>
-      <Grid container height="100vh">
-        <Grid item xs={4}>
-            <Grid height="100%" container direction="column">
-                <Grid display="flex" justifyContent="center" alignItems="center" item xs={2}><UserCard/></Grid>
-                <Grid item xs={9}><ChatBox/></Grid>
-                <Grid item xs={1}>Menu</Grid>
-            </Grid>
+      <Grid container>
+        <Grid sx={{backgroundColor: "#F2F7F9"}} display="flex" direction="column" item xs={4} height="100vh">
+                <Grid display="flex" justifyContent="center" alignItems="center" item><UserCard/></Grid>
+                <Grid display="flex" justifyContent="flex-start" flexGrow={1} item><ChatBox/></Grid>
+                <Grid item><MenuPanel/></Grid>
         </Grid>
-        <Grid item xs={8}>
-        <Grid height="100%" container direction="column">
-                <Grid item xs={1}>Chat Data</Grid>
-                <Grid item xs={10}>Chat</Grid>
-                <Grid item xs={1}>InputField</Grid>
+        <Grid display="flex" direction="column" item xs={8} height="100vh">
+                {activeChat ? 
+                <>
+                  <Grid display="flex" justifyContent="center" alignItems="center" item><ChatHeader chat={activeChat}/></Grid>
+                  <Grid flexGrow={1} item>Chat</Grid>
+                  <Grid item><ChatInputField/></Grid>
+                </>
+                 : 
+                 <></>}
             </Grid>
-        </Grid>
       </Grid>
     </>
   );

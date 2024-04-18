@@ -129,5 +129,6 @@ export const {
 } = chatSlice.actions;
 
 export const selectChats = (state : RootState) => state.chat.chats
+export const selectActiveChat = (state : RootState) => state.chat.activeChat
 
 export default chatSlice.reducer;

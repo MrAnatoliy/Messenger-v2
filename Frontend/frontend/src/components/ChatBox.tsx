@@ -1,11 +1,9 @@
-import React from "react";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useAppSelector } from "../store/hooks";
 import { IChat, selectChats } from "../store/chatSlice";
-import { Box, List, Typography } from "@mui/material";
+import { Box, List } from "@mui/material";
 import ChatCard from "./ChatCard";
 
 const ChatBox = () => {
-  const dispatch = useAppDispatch();
 
   const chatsData = useAppSelector(selectChats);
 
