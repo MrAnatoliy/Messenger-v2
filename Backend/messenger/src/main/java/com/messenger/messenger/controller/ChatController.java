@@ -13,7 +13,6 @@ import com.messenger.messenger.entity.HelloMessage;
 @Controller
 public class ChatController {
 
-    @SuppressWarnings("null")
     @MessageMapping("/hello")
     @SendTo("/topic/greetings")
     public Greeting greeting(HelloMessage message) throws Exception {
