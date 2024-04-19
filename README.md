@@ -11,7 +11,4 @@ This project use React JS and TypeScript to implement SPA, Redux to save global 
 
 > [!Caution]
 > Because this project is under development most of implemented featured located in feature branches.
-> * `feature/chat-service` Contains current chat implementation
-> * `feature/frontend` Contains current frontend implementation
-> * `develop` Has server with auth implementation
-> *  `main` Now only have a copy of code from `develop`
+> * `develop` Contains current implementatino of fronend and chat service in backend
