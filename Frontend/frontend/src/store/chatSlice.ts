@@ -30,15 +30,16 @@ export interface IChatSlice {
   loading: "idle" | "pending" | "failed" | "succeeded";
   message: string | null;
   chats: Array<IChat> | null;
-  activeChat : IChat | null;
+  activeChat: IChat | null;
+  activePage: "chats" | "people" | "settings";
 }
 
 const myself: IContact = {
-    contact_name: "me",
-    last_online: new Date().toISOString(),
-    unread: 0,
-    status: "online"
-}
+  contact_name: "me",
+  last_online: new Date().toISOString(),
+  unread: 0,
+  status: "online",
+};
 
 const gosha: IContact = {
   contact_name: "Georgeous",
@@ -69,7 +70,7 @@ const initialState: IChatSlice = {
       messages: [
         {
           sender: gosha,
-          time: new Date(2024, 3, 18, 18, 0, 0, 0).toISOString(),
+          time: new Date(2024, 3, 19, 7, 15, 0, 0).toISOString(),
           message_status: "read",
           content: "Ха! Ты пидр :)",
         },
@@ -89,7 +90,37 @@ const initialState: IChatSlice = {
           sender: myself,
           time: new Date(2024, 3, 17, 17, 59, 32, 0).toISOString(),
           message_status: "read",
+          content: "Внатуре чёрт x3!!!",
+        },
+        {
+          sender: myself,
+          time: new Date(2024, 3, 17, 17, 59, 32, 0).toISOString(),
+          message_status: "delivered",
+          content: "Внатуре чёрт x2!!!",
+        },
+        {
+          sender: myself,
+          time: new Date(2024, 3, 17, 17, 59, 32, 0).toISOString(),
+          message_status: "sended",
           content: "Внатуре чёрт!!!",
+        },
+        {
+          sender: myself,
+          time: new Date(2023, 1, 1, 5, 0, 32, 0).toISOString(),
+          message_status: "sended",
+          content: "Отправлено",
+        },
+        {
+          sender: myself,
+          time: new Date(2023, 1, 1, 5, 10, 32, 0).toISOString(),
+          message_status: "delivered",
+          content: "Получено",
+        },
+        {
+          sender: myself,
+          time: new Date(2023, 1, 1, 5, 15, 32, 0).toISOString(),
+          message_status: "read",
+          content: "Прочитано",
         },
       ],
     },
@@ -104,6 +135,7 @@ const initialState: IChatSlice = {
     },
   ],
   activeChat: null,
+  activePage: "chats",
 };
 
 export const chatSlice = createSlice({
@@ -122,7 +154,13 @@ export const chatSlice = createSlice({
       state.ws_connection = true;
     },
     setActiveChat: (state, action: PayloadAction<IChat>) => {
-        state.activeChat = action.payload
+      state.activeChat = action.payload;
+    },
+    setActivePage: (
+      state,
+      action: PayloadAction<"chats" | "people" | "settings">
+    ) => {
+      state.activePage = action.payload;
     },
   },
 });
@@ -132,9 +170,11 @@ export const {
   failedEstablishWSConnection,
   succeedEstablishingWSConnection,
   setActiveChat,
+  setActivePage,
 } = chatSlice.actions;
 
-export const selectChats = (state : RootState) => state.chat.chats
-export const selectActiveChat = (state : RootState) => state.chat.activeChat
+export const selectChats = (state: RootState) => state.chat.chats;
+export const selectActiveChat = (state: RootState) => state.chat.activeChat;
+export const selectActivePage = (state: RootState) => state.chat.activePage;
 
 export default chatSlice.reducer;

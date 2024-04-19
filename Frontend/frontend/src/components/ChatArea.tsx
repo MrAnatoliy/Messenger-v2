@@ -1,8 +1,13 @@
 import { Box, Typography, useTheme } from "@mui/material";
 import { IChat, IMessage } from "../store/chatSlice";
 
+import sended from "../static/Sended.svg";
+import delivered from "../static/Delivered.svg";
+import read from "../static/Viewed.svg";
+
 interface IMessageBox {
   message: IMessage;
+  displayTime: boolean;
 }
 
 const SenderMessage = (props: IMessageBox) => {
@@ -30,53 +35,98 @@ const SenderMessage = (props: IMessageBox) => {
           backgroundColor: "secondary.main",
           fontSize: "16px",
           color: "white",
-          borderRadius: "20px",
+          borderRadius: "15px",
           wordWrap: "break-word", // Enable text wrapping
           maxWidth: "35%", // Set maximum width to allow wrapping
         }}
       >
         {props.message.content}
       </Box>
-      <Box color="primary.main">{messageTime}</Box>
+
+      {props.displayTime ? (
+        <Box color="primary.main">{messageTime}</Box>
+      ) : (
+        <></>
+      )}
     </Box>
   );
 };
 
 const SelfMessage = (props: IMessageBox) => {
-    const messageDate = new Date(props.message.time);
-    const messageTime =
-      messageDate.getHours() +
-      ":" +
-      (messageDate.getMinutes() === 0 ? "00" : messageDate.getMinutes());
-  
-    return (
+  const messageStatus = props.message.message_status;
+  const messageDate = new Date(props.message.time);
+  const messageTime =
+    messageDate.getHours() +
+    ":" +
+    (messageDate.getMinutes() === 0 ? "00" : messageDate.getMinutes());
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        alignItems: "flex-end",
+        margin: 2,
+      }}
+    >
       <Box
         sx={{
           display: "flex",
-          flexDirection: "row",
-          justifyContent: "flex-end",
-          alignItems: "flex-end",
-          margin: 2,
+          flexDirection: "column",
         }}
       >
-        <Box color="primary.main">{messageTime}</Box>
+        {props.displayTime ? (
+          <Box color="primary.main">{messageTime}</Box>
+        ) : (
+          <></>
+        )}
         <Box
           sx={{
-            paddingY: 1,
-            paddingX: 2,
-            marginLeft: 1,
-            backgroundColor: "primary.main",
-            fontSize: "16px",
-            color: "white",
-            borderRadius: "20px",
-            wordWrap: "break-word", // Enable text wrapping
-            maxWidth: "35%", // Set maximum width to allow wrapping
+            display: "flex",
+            justifyContent: "flex-end",
           }}
         >
-          {props.message.content}
+          {messageStatus === "sended" ? (
+            <>
+              <img width={16 * 0.75} src={sended} alt="sended" />
+            </>
+          ) : (
+            <></>
+          )}
+          {messageStatus === "delivered" ? (
+            <>
+              <img width={36 * 0.75} src={delivered} alt="delivered" />
+            </>
+          ) : (
+            <></>
+          )}
+          {messageStatus === "read" ? (
+            <>
+              <img width={56 * 0.75} src={read} alt="read" />
+            </>
+          ) : (
+            <></>
+          )}
         </Box>
       </Box>
-    );
+      <Box
+        sx={{
+          paddingY: 1,
+          paddingX: 2,
+          marginLeft: 1,
+          backgroundColor: "primary.main",
+          fontSize: "16px",
+          color: "white",
+          borderRadius: "15px",
+          wordWrap: "break-word", // Enable text wrapping
+          maxWidth: "35%", // Set maximum width to allow wrapping
+        }}
+      >
+        {props.message.content}
+      </Box>
+    </Box>
+  );
 };
 
 interface IDateLine {
@@ -213,22 +263,60 @@ const ChatArea = (props: IChatArea) => {
     const messageDate = new Date(message.time);
 
     if (index === 0) {
-      chatArray.push(<DateLine date={messageDate} />);
+      chatArray.push(<DateLine key={index + "date"} date={messageDate} />);
+    }
+
+    let displaySelfMessagesTime = true;
+    let displaySenderMessagesTime = true;
+
+    if (index >= 1) {
+      const prevMessageDate = new Date(chatData[index - 1].time);
+
+      const messageDateString = messageDate.toISOString().slice(0, 10);
+      const prevMessageDateString = prevMessageDate.toISOString().slice(0, 10);
+
+      if (messageDateString !== prevMessageDateString) {
+        chatArray.push(<DateLine key={index + "date"} date={messageDate} />);
+      }
+    }
+
+    if (index < chatData.length - 1) {
+      const nextMessage = chatData[index + 1];
+      const nextMessageDate = new Date(nextMessage.time);
+
+      const messageTimeString = messageDate.toISOString().slice(11, 16);
+      const nextMessageTimeString = nextMessageDate.toISOString().slice(11, 16);
+
+      if (messageTimeString === nextMessageTimeString) {
+        if (message.sender === nextMessage.sender) {
+          if (message.sender.contact_name === "me") {
+            displaySelfMessagesTime = false;
+          } else {
+            displaySenderMessagesTime = false;
+          }
+        }
+      }
+    } else {
+      displaySelfMessagesTime = true;
+      displaySenderMessagesTime = true;
     }
 
     if (message.sender.contact_name === "me") {
-      chatArray.push(<SelfMessage message={message} />);
+      chatArray.push(
+        <SelfMessage
+          key={index}
+          displayTime={displaySelfMessagesTime}
+          message={message}
+        />
+      );
     } else {
-      chatArray.push(<SenderMessage message={message} />);
-    }
-
-    if (index !== chatData.length - 1) {
-      const nextMessageDate = new Date(chatData[index + 1].time);
-      const messageDateString = messageDate.toISOString().slice(0, 10);
-      const nextMessageDateString = nextMessageDate.toISOString().slice(0, 10);
-      if (messageDateString !== nextMessageDateString) {
-        chatArray.push(<DateLine date={nextMessageDate} />);
-      }
+      chatArray.push(
+        <SenderMessage
+          key={index}
+          displayTime={displaySenderMessagesTime}
+          message={message}
+        />
+      );
     }
   });
 

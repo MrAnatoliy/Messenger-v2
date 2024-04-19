@@ -4,8 +4,13 @@ import {
   SettingsRounded,
 } from "@mui/icons-material";
 import { Box, IconButton } from "@mui/material";
+import { useAppDispatch } from "../store/hooks";
+import { setActivePage } from "../store/chatSlice";
 
 const MenuPanel = () => {
+
+  const dispatcher = useAppDispatch()
+
   return (
     <Box
       sx={{
@@ -19,6 +24,7 @@ const MenuPanel = () => {
       }}
     >
     <IconButton
+      onClick={() => dispatcher(setActivePage("chats"))}
       sx={{
         width: "40px",
         height: "40px",
@@ -37,6 +43,7 @@ const MenuPanel = () => {
       <PeopleAltRounded sx={{ color: "primary.main", fontSize: 32 }} />
     </IconButton>
     <IconButton
+      onClick={() => dispatcher(setActivePage("people"))}
       sx={{
         width: "40px",
         height: "40px",
@@ -55,6 +62,7 @@ const MenuPanel = () => {
       <Search sx={{ color: "primary.main", fontSize: 32 }} />
     </IconButton>
     <IconButton
+      onClick={() => dispatcher(setActivePage("settings"))}
       sx={{
         width: "40px",
         height: "40px",
