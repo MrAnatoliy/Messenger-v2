@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 
@@ -26,10 +27,13 @@ public class User implements UserDetails {
     private Long id;
     @Email(message = "incorrect email")
     private String email;
+    private String userLogin;
     private String password;
     private String prevPassword;
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private List<User> contacts;
 
 
     @Override
