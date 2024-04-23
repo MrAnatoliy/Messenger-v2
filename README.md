@@ -10,5 +10,5 @@ To route messages between server and users this project use STOMP over WebSocket
 This project use React JS and TypeScript to implement SPA, Redux to save global state of application and Material UI.
 
 > [!Caution]
-> Because this project is under development most of implemented featured located in feature branches.
+> Because this project is under development most of implemented featured located in feature and develop branches.
 > * `develop` Contains current implementatino of fronend and chat service in backend
