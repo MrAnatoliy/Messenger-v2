@@ -40,7 +40,7 @@ const PeopleBox = () => {
 
   useEffect(() => {
     dispatch(getAllContacts({userId: myself?.contact_id || 0, token: token || ""}))
-  }, [dispatch, myself?.contact_id, token, contacts])
+  }, [dispatch, myself?.contact_id, token])
 
   return (
     <Box

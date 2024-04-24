@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +35,7 @@ public class User implements UserDetails {
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
     @ManyToMany(fetch = FetchType.EAGER)
+    @JsonBackReference
     private List<User> contacts;
 
 
@@ -64,5 +67,15 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", userLogin='" + userLogin + '\'' +
+                ", roles=" + roles +
+                '}';
     }
 }

@@ -1,9 +1,14 @@
 package com.messenger.messenger.controller;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.aggregation.DateOperators.IsoDateFromParts;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -17,9 +22,12 @@ import org.springframework.web.util.HtmlUtils;
 
 import com.messenger.messenger.domain.User;
 import com.messenger.messenger.entity.ChatMessage;
+import com.messenger.messenger.entity.ChatMessageInterface;
+import com.messenger.messenger.entity.ChatMessageResponse;
 import com.messenger.messenger.entity.ChatNotification;
 import com.messenger.messenger.entity.ChatRoom;
 import com.messenger.messenger.entity.Contact;
+import com.messenger.messenger.entity.MessageStatus;
 import com.messenger.messenger.entity.ResponseUser;
 import com.messenger.messenger.repository.ChatMessageRepository;
 import com.messenger.messenger.response.PeopleResponse;
@@ -50,23 +58,53 @@ public class ChatController {
     @Autowired private UserService userService;
 
     @MessageMapping("/chat")
-    public void processMessage(@Payload ChatMessage chatMessage){
+    public void processMessage(@Payload ChatMessageInterface chatMessage){
+
+        User sender = userService.findUserById(chatMessage.getSenderId());
+        User recipient = userService.findUserById(chatMessage.getRecipientId());
+
         ChatRoom repositoryChatRoom = chatRoomService.getChat
         (
-            chatMessage.getSender(),
-            chatMessage.getRecipient(),
+            sender,
+            recipient,
             true
         )
             .orElse(null
         );
-        chatMessage.setChatRoom(repositoryChatRoom);
-        ChatMessage savedChatMessage = chatMessageService.save(chatMessage);
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+
+        ChatMessage parsedMessage = null;
+        try {
+            parsedMessage = ChatMessage
+            .builder()
+            .sender(sender)
+            .recipient(recipient)
+            .message(chatMessage.getContent())
+            .timestamp(dateFormat.parse(chatMessage.getTime()))
+            .status(MessageStatus.DELIVERED)
+            .build();
+        } catch (ParseException e) {
+            System.err.print("Failed to parse date string");
+            e.printStackTrace();
+        }
+
+        parsedMessage.setChatRoom(repositoryChatRoom);
+        ChatMessage savedChatMessage = chatMessageService.save(parsedMessage);
         messagingTemplate.convertAndSendToUser
         (
-            chatMessage.getRecipient().getId().toString(),"/queue/messages",
+            chatMessage.getRecipientId().toString(),"/queue/messages",
             new ChatNotification(
                 savedChatMessage.getSender().getId(),
                 savedChatMessage.getSender().getUsername(),
+                savedChatMessage.getMessage()
+            )
+        );
+
+        messagingTemplate.convertAndSendToUser
+        (
+            chatMessage.getSenderId().toString(),"/queue/messageResponse",
+            new ChatMessageResponse(
                 savedChatMessage.getMessage()
             )
         );
@@ -102,11 +140,21 @@ public class ChatController {
         List<User> userContactsList = user.getContacts();  
         userContactsList.stream().forEach(userContact -> {
             List<ChatMessage> messages = chatMessageService.getMessagesByChatRoom(user, userContact);
+            List<ChatMessageInterface> messageInterfaces = messages.stream().map(message -> 
+                ChatMessageInterface
+                    .builder()
+                    .senderId(message.getSender().getId())
+                    .recipientId(message.getRecipient().getId())
+                    .time(message.getTimestamp().toString())
+                    .content(message.getMessage())
+                    .status(message.getStatus().toString())
+                    .build()
+            ).toList();
             if(messages != null) {
                 contacts.add(Contact
                 .builder()
                 .contact(new ResponseUser(userContact))
-                .messages(messages)
+                .messages(messageInterfaces)
                 .build()
                 );
             }
@@ -120,6 +168,7 @@ public class ChatController {
         User user = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User toContactUser = userService.findUserById(toContactUserId);
         List<User> newContacts = userService.addContact(user, toContactUser);
+        if(newContacts == null) return ResponseEntity.badRequest().body(new PeopleResponse(null));
         List<ResponseUser> responseContacts = newContacts.stream().map(contact -> new ResponseUser(toContactUser)).toList();
 
         return ResponseEntity.ok(new PeopleResponse(responseContacts));

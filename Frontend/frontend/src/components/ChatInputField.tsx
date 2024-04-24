@@ -1,9 +1,17 @@
 import { SendRounded } from "@mui/icons-material";
 import { Box, IconButton, TextField } from "@mui/material";
-import React from "react";
-import { subscribeToMessages } from "../util/WebSocketService";
+import React, { useState } from "react";
+import { IMessageRequest, sendMessage, subscribeToMessages } from "../util/WebSocketService";
+import { IContact, IMessage, selectActiveChat, selectMyself } from "../store/chatSlice";
+import { useAppSelector } from "../store/hooks";
+import { selectUser } from "../store/authSlice";
 
 const ChatInputField = () => {
+
+  const [message,setMessage] = useState("")
+  const myself = useAppSelector(selectMyself)
+  const recipeint = useAppSelector(selectActiveChat)?.sender;
+  
   return (
     <Box
       sx={{
@@ -15,8 +23,22 @@ const ChatInputField = () => {
         justifyContent: "center",
       }}
     >
-      <MessageInputField />
+      <MessageInputField message={message} setMessage={setMessage} />
       <IconButton
+        onClick={() => {
+          if(myself && recipeint){
+          const toSendMessage : IMessageRequest = {
+            senderId: myself.contact_id,
+            recipientId : recipeint.contact_id,
+            time : new Date().toISOString(),
+            content : message,
+            status : "sended",
+          }
+          console.log(toSendMessage)
+          sendMessage(toSendMessage)
+          
+        }
+        }}
         sx={{
           width: "40px",
           height: "40px",
@@ -38,9 +60,16 @@ const ChatInputField = () => {
   );
 };
 
-const MessageInputField = () => {
+interface IMessageInput {
+  message : string,
+  setMessage : any
+}
+
+const MessageInputField = (props : IMessageInput) => {
   return (
     <TextField
+      value={props.message}
+      onChange={(e) => props.setMessage(e.target.value)}
       autoComplete="off"
       type="text"
       sx={{

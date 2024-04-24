@@ -36,6 +36,7 @@ public class UserService implements UserDetailsService {
 
     public List<User> addContact(User userAddTo, User userToAdd) {
         List<User> contacts = userAddTo.getContacts();
+        if(contacts.stream().anyMatch(contact -> contact.getId() == userToAdd.getId())) return null;
         contacts.add(userToAdd);
         userAddTo.setContacts(contacts);
         userRepository.save(userAddTo);

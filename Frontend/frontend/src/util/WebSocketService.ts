@@ -1,5 +1,5 @@
 import { selectUser } from "../store/authSlice"
-import { WSConnectionFail, WSConnectionOpen, selectActiveChat } from "../store/chatSlice"
+import { IMessage, WSConnectionFail, WSConnectionOpen, getAllContacts, selectActiveChat, setActiveChat, updateActiveChat } from "../store/chatSlice"
 import { store } from "../store/store"
 
 const WS_CONNECTION_URL = process.env.REACT_APP_WS_CONNECTION_URL
@@ -31,21 +31,52 @@ export const subscribeToMessages = () => {
     client.subscribe(
         "/user/" + userId + "/queue/messages",onMessageRecieved
     )   
+
+    client.subscribe(
+        "/user/" + userId + "/queue/messageResponse",onMessageResponseRecieved
+    )
 }
 
 interface IChatNotification {
-    id : number
-    username : string,
+    userId : number
+    userName : string,
     message : string,
 }
 
 const onMessageRecieved = (message : any) => {
-    const notification : IChatNotification = JSON.parse(message.body)
+    const notification = JSON.parse(message.body)
     const activeChat = selectActiveChat(store.getState())
+    const user = selectUser(store.getState())
 
-    if(activeChat?.sender.contact_id === notification.id){
-        //save message in corresponding chat and display it there
+    console.log(message)
+    console.log(notification)
+
+    if(activeChat?.sender.contact_id === notification.userId){
+        store.dispatch(getAllContacts({userId: user?.id || 0, token: user?.token || ""}))
+        console.log("Message has been received. Dispatching new messages...")
     } else {
+        console.log("Message going in non active chat")
         //pop up notification and make a "new messages" line
+    }
+}
+
+const onMessageResponseRecieved = (message : any) => {
+    const user = selectUser(store.getState())
+
+    store.dispatch(getAllContacts({userId: user?.id || 0, token: user?.token || ""}))
+    console.log("Message has been sended. Dispatching new messages...")
+}
+
+export interface IMessageRequest {
+    senderId: number,
+    recipientId : number,
+    time : string,
+    content : string,
+    status : string,
+}
+
+export const sendMessage = (message : IMessageRequest) => {
+    if(message.content.trim() !== ""){
+        client.send("/app/chat", {}, JSON.stringify(message))
     }
 }

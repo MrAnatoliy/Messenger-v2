@@ -1,9 +1,18 @@
 import { Box, Typography, useTheme } from "@mui/material";
-import { IChat, IMessage } from "../store/chatSlice";
+import {
+  IChat,
+  IMessage,
+  selectActiveChat,
+  selectChats,
+  selectMyself,
+  setActiveChat,
+} from "../store/chatSlice";
 
 import sended from "../static/Sended.svg";
 import delivered from "../static/Delivered.svg";
 import read from "../static/Viewed.svg";
+import { useState } from "react";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
 
 interface IMessageBox {
   message: IMessage;
@@ -53,7 +62,7 @@ const SenderMessage = (props: IMessageBox) => {
 };
 
 const SelfMessage = (props: IMessageBox) => {
-  const messageStatus = props.message.message_status;
+  const messageStatus = props.message.status;
   const messageDate = new Date(props.message.time);
   const messageTime =
     messageDate.getHours() +
@@ -247,7 +256,8 @@ interface IChatArea {
 }
 
 const ChatArea = (props: IChatArea) => {
-  const activeChat: IChat = props.chat;
+  let activeChat = useAppSelector(selectActiveChat);
+  const myself = useAppSelector(selectMyself);
   let chatData: IMessage[] = [];
 
   if (activeChat && activeChat.messages !== null) {
@@ -288,8 +298,8 @@ const ChatArea = (props: IChatArea) => {
       const nextMessageTimeString = nextMessageDate.toISOString().slice(11, 16);
 
       if (messageTimeString === nextMessageTimeString) {
-        if (message.sender === nextMessage.sender) {
-          if (message.sender.contact_name === "me") {
+        if (message.senderId === nextMessage.senderId) {
+          if (message.senderId === myself?.contact_id) {
             displaySelfMessagesTime = false;
           } else {
             displaySenderMessagesTime = false;
@@ -301,7 +311,7 @@ const ChatArea = (props: IChatArea) => {
       displaySenderMessagesTime = true;
     }
 
-    if (message.sender.contact_name === "me") {
+    if (message.senderId === myself?.contact_id) {
       chatArray.push(
         <SelfMessage
           key={index}

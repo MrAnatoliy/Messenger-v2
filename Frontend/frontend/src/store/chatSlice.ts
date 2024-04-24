@@ -1,8 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { RootState, store } from "./store";
 import axios from "axios";
-import { useAppSelector } from "./hooks";
-import { selectUser } from "./authSlice";
 
 export interface IContact {
   contact_id: number;
@@ -13,9 +11,10 @@ export interface IContact {
 }
 
 export interface IMessage {
-  sender: IContact;
+  senderId: number;
+  recipientId : number;
   time: string;
-  message_status: "sended" | "delivered" | "read";
+  status: "sended" | "delivered" | "read";
   content: string; //TODO - make a content an object with separate text and files like images/videos/files e.t.c.
 }
 
@@ -69,6 +68,11 @@ export const chatSlice = createSlice({
     setActiveChat: (state, action: PayloadAction<IChat>) => {
       state.activeChat = action.payload;
     },
+    updateActiveChat: (state) => {
+      if (state.activeChat && state.chats) {
+        //
+      }
+    },
     setActivePage: (
       state,
       action: PayloadAction<"chats" | "people" | "settings">
@@ -87,7 +91,11 @@ export const chatSlice = createSlice({
       } else {
         const existingChat = state.chats?.at(existingChatIndex || -1);
         if (existingChat?.messages && newChat.messages) {
-          existingChat.messages = existingChat.messages.concat(newChat.messages);
+          existingChat.messages = newChat.messages;
+
+          if(state.activeChat?.sender.contact_id === existingChat.sender.contact_id){
+            state.activeChat = existingChat
+          }
         }
       }
     },
@@ -99,6 +107,7 @@ export const {
   WSConnectionClose,
   WSConnectionFail,
   setActiveChat,
+  updateActiveChat,
   setActivePage,
   setMyselfContact,
   addChat,
@@ -150,7 +159,6 @@ export const getAllContacts = createAsyncThunk(
         },
       });
       const data: Array<IResponseContact> = (await response).data.contacts;
-      console.log(data);
       data.forEach((contact) => {
         dispatch(
           addChat({
