@@ -3,9 +3,11 @@ import { RootState } from "./store";
 import axios from "axios";
 import Cookies from "universal-cookie";
 import { STATUS } from "../util/statuses";
+import { IContact, setMyselfContact } from "./chatSlice";
 
 export interface IAuthSlice {
   user: {
+    id: number;
     username: string;
     email: string;
     token: string;
@@ -18,7 +20,9 @@ export interface IAuthSlice {
 }
 
 export interface IAuthResponse {
+  id: number;
   token: string;
+  userLogin: string;
   message: string;
   roles: string[];
 }
@@ -43,6 +47,12 @@ export const authSlice = createSlice({
       state.loading = "pending";
     },
     logout: (state) => {
+      const cookies = new Cookies();
+      cookies.remove('id')
+      cookies.remove('token')
+      cookies.remove('username')
+      cookies.remove('authorities')
+
       state.loading = "idle";
       state.user = null;
     },
@@ -50,7 +60,8 @@ export const authSlice = createSlice({
       state.loading = "succeeded";
       state.isLoggedIn = true;
       state.user = {
-        username: "username",
+        id: action.payload.id,
+        username: action.payload.userLogin,
         email: "email",
         token: action.payload.token,
         authorities: action.payload.roles,
@@ -105,9 +116,20 @@ export const authenticate = createAsyncThunk(
       const data: IAuthResponse = response.data;
       if (data.token) {
         dispatch(authSuccess(data));
+        const myself: IContact = {
+          contact_id: data.id,
+          contact_name: data.userLogin,
+          last_online: new Date().toISOString(),
+          unread: 0,
+          status: "online",
+        }
+        dispatch(setMyselfContact(myself))
         const cookies = new Cookies();
+        cookies.set("id", data.id)
         cookies.set("token", data.token);
+        cookies.set("username", data.userLogin)
         cookies.set("authorities", data.roles);
+        cookies.set("myself", myself)
       } else {
         dispatch(authFail(data));
       }

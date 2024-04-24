@@ -1,7 +1,7 @@
 package com.messenger.messenger.response;
 
 import java.util.List;
-import com.messenger.messenger.domain.User;
+import com.messenger.messenger.entity.ResponseUser;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,5 +13,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PeopleResponse {
-    private List<User> contacts;
+    private List<ResponseUser> contacts;
 }

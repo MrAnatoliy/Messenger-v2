@@ -24,6 +24,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
 import { LoadingButton } from "@mui/lab";
+import { setMyselfContact } from "../store/chatSlice";
 
 const Login = () => {
 
@@ -73,17 +74,23 @@ const Login = () => {
   );  
 
   const loadDataOnlyOnce = () => {
+    const cookieId = cookies.get('id')
     const cookieToken = cookies.get('token')
     const cookieAuth = cookies.get('authorities')
+    const cookieUsername = cookies.get('username')
+    const cookieMyself = cookies.get('myself')
 
-    if(cookieToken && cookieAuth){
+    if(cookieToken && cookieAuth && cookieUsername && cookieId && cookieMyself){
       const data : IAuthResponse = {
+        id: cookieId,
         token: cookieToken,
+        userLogin: cookieUsername,
         message: "Authenticate from cookies",
         roles: cookieAuth,
       }
       window.history.pushState({}, "", "/")
       dispatch(authSuccess(data))
+      dispatch(setMyselfContact(cookieMyself))
     }
   }
 

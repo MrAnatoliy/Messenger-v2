@@ -20,6 +20,7 @@ import com.messenger.messenger.entity.ChatMessage;
 import com.messenger.messenger.entity.ChatNotification;
 import com.messenger.messenger.entity.ChatRoom;
 import com.messenger.messenger.entity.Contact;
+import com.messenger.messenger.entity.ResponseUser;
 import com.messenger.messenger.repository.ChatMessageRepository;
 import com.messenger.messenger.response.PeopleResponse;
 import com.messenger.messenger.response.ContactsResponse;
@@ -88,7 +89,9 @@ public class ChatController {
 
     @GetMapping("/people")
     public ResponseEntity<PeopleResponse> getAllPeople() {
-        return ResponseEntity.ok(new PeopleResponse(userService.allUsers()));
+        List<User> users = userService.allUsers();
+        List<ResponseUser> responseUsers = users.stream().map(user -> new ResponseUser(user)).toList();
+        return ResponseEntity.ok(new PeopleResponse(responseUsers));
     }
     
     @GetMapping("/messages/{userId}")
@@ -102,7 +105,7 @@ public class ChatController {
             if(messages != null) {
                 contacts.add(Contact
                 .builder()
-                .contact(userContact)
+                .contact(new ResponseUser(userContact))
                 .messages(messages)
                 .build()
                 );
@@ -117,8 +120,9 @@ public class ChatController {
         User user = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User toContactUser = userService.findUserById(toContactUserId);
         List<User> newContacts = userService.addContact(user, toContactUser);
+        List<ResponseUser> responseContacts = newContacts.stream().map(contact -> new ResponseUser(toContactUser)).toList();
 
-        return ResponseEntity.ok(new PeopleResponse(newContacts));
+        return ResponseEntity.ok(new PeopleResponse(responseContacts));
     }
     
     

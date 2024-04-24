@@ -1,7 +1,11 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { RootState } from "./store";
+import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { RootState, store } from "./store";
+import axios from "axios";
+import { useAppSelector } from "./hooks";
+import { selectUser } from "./authSlice";
 
 export interface IContact {
+  contact_id: number;
   contact_name: string;
   last_online: string;
   unread: number;
@@ -27,131 +31,40 @@ export interface INotification {
 
 export interface IChatSlice {
   ws_connection: boolean;
-  loading: "idle" | "pending" | "failed" | "succeeded";
+  loading: "closed" | "pending" | "failed" | "opened";
   message: string | null;
   chats: Array<IChat> | null;
   activeChat: IChat | null;
   activePage: "chats" | "people" | "settings";
+  myself: IContact | null;
 }
-
-const myself: IContact = {
-  contact_name: "me",
-  last_online: new Date().toISOString(),
-  unread: 0,
-  status: "online",
-};
-
-const gosha: IContact = {
-  contact_name: "Georgeous",
-  last_online: new Date(2024, 3, 17, 18, 0, 0, 0).toISOString(),
-  unread: 0,
-  status: "offline",
-};
-
-/**
-const initialState : IChatSlice = {
-    ws_connection: false,
-    loading: "idle",
-    message: null,
-    chats: null,
-    activeChat: null,
-}
-*/
-
-//FIXME - Implement proper contact and message fetching
 
 const initialState: IChatSlice = {
   ws_connection: false,
-  loading: "idle",
+  loading: "closed",
   message: null,
-  chats: [
-    {
-      sender: gosha,
-      messages: [
-        {
-          sender: gosha,
-          time: new Date(2024, 3, 19, 7, 15, 0, 0).toISOString(),
-          message_status: "read",
-          content: "Ха! Ты пидр :)",
-        },
-        {
-          sender: gosha,
-          time: new Date(2024, 3, 17, 18, 0, 0, 0).toISOString(),
-          message_status: "read",
-          content: "Вообщем давай, вацок, отдыхай",
-        },
-        {
-          sender: myself,
-          time: new Date(2024, 3, 17, 17, 59, 45, 0).toISOString(),
-          message_status: "read",
-          content: "Вот ты пидр ёпта",
-        },
-        {
-          sender: myself,
-          time: new Date(2024, 3, 17, 17, 59, 32, 0).toISOString(),
-          message_status: "read",
-          content: "Внатуре чёрт x3!!!",
-        },
-        {
-          sender: myself,
-          time: new Date(2024, 3, 17, 17, 59, 32, 0).toISOString(),
-          message_status: "delivered",
-          content: "Внатуре чёрт x2!!!",
-        },
-        {
-          sender: myself,
-          time: new Date(2024, 3, 17, 17, 59, 32, 0).toISOString(),
-          message_status: "sended",
-          content: "Внатуре чёрт!!!",
-        },
-        {
-          sender: myself,
-          time: new Date(2023, 1, 1, 5, 0, 32, 0).toISOString(),
-          message_status: "sended",
-          content: "Отправлено",
-        },
-        {
-          sender: myself,
-          time: new Date(2023, 1, 1, 5, 10, 32, 0).toISOString(),
-          message_status: "delivered",
-          content: "Получено",
-        },
-        {
-          sender: myself,
-          time: new Date(2023, 1, 1, 5, 15, 32, 0).toISOString(),
-          message_status: "read",
-          content: "Прочитано",
-        },
-      ],
-    },
-    {
-      sender: {
-        contact_name: "Povidloid",
-        last_online: new Date(2024, 3, 17, 18, 0, 0, 0).toISOString(),
-        unread: 0,
-        status: "away",
-      },
-      messages: null,
-    },
-  ],
+  chats: [],
   activeChat: null,
   activePage: "chats",
+  myself: null,
 };
 
 export const chatSlice = createSlice({
   name: "chat",
   initialState,
   reducers: {
-    establishingWSConnection: (state) => {
-      state.loading = "pending";
+    WSConnectionOpen: (state) => {
+      state.loading = "opened";
+      state.ws_connection = true;
     },
-    failedEstablishWSConnection: (state) => {
-      state.loading = "failed";
+    WSConnectionClose: (state) => {
+      state.loading = "closed";
       state.ws_connection = false;
     },
-    succeedEstablishingWSConnection: (state) => {
-      state.loading = "succeeded";
-      state.ws_connection = true;
+    WSConnectionFail: (state) => {
+      state.loading = "failed";
+      state.message = "Failed to establish ws connection";
+      state.ws_connection = false;
     },
     setActiveChat: (state, action: PayloadAction<IChat>) => {
       state.activeChat = action.payload;
@@ -162,19 +75,129 @@ export const chatSlice = createSlice({
     ) => {
       state.activePage = action.payload;
     },
+    setMyselfContact: (state, action: PayloadAction<IContact>) => {
+      state.myself = action.payload;
+    },
+    addChat: (state, action: PayloadAction<IChat>) => {
+      const newChat = action.payload;
+      // Check if a chat with the same contact_id already exists
+      const existingChatIndex = state.chats?.findIndex(chat => chat.sender.contact_id === newChat.sender.contact_id);
+      if (existingChatIndex === -1) {
+        state.chats?.push(newChat);
+      } else {
+        const existingChat = state.chats?.at(existingChatIndex || -1);
+        if (existingChat?.messages && newChat.messages) {
+          existingChat.messages = existingChat.messages.concat(newChat.messages);
+        }
+      }
+    },
   },
 });
 
 export const {
-  establishingWSConnection,
-  failedEstablishWSConnection,
-  succeedEstablishingWSConnection,
+  WSConnectionOpen,
+  WSConnectionClose,
+  WSConnectionFail,
   setActiveChat,
   setActivePage,
+  setMyselfContact,
+  addChat,
 } = chatSlice.actions;
 
 export const selectChats = (state: RootState) => state.chat.chats;
 export const selectActiveChat = (state: RootState) => state.chat.activeChat;
 export const selectActivePage = (state: RootState) => state.chat.activePage;
+export const selectWSConnection = (state: RootState) => state.chat.loading;
+export const selectMyself = (state: RootState) => state.chat.myself;
 
 export default chatSlice.reducer;
+
+const API_URL = process.env.REACT_APP_API_URL;
+
+export interface IResponseUser {
+  id: number;
+  email: string;
+  userLogin: string;
+}
+
+export const getAllPeople = async (token: string) => {
+  try {
+    const response = await axios.get(API_URL + "chat/people", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data: Array<IResponseUser> = response.data.contacts;
+    return data ? data : null;
+  } catch (err: any) {
+    return null;
+  }
+};
+
+interface IResponseContact {
+  contact: IResponseUser;
+  messages: IMessage[];
+}
+
+export const getAllContacts = createAsyncThunk(
+  "chat/getAllContacts",
+  async (
+    { userId, token }: { userId: number; token: string },
+    { dispatch, rejectWithValue }
+  ) => {
+    try {
+      const response = axios.get(API_URL + "chat/messages/" + userId, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data: Array<IResponseContact> = (await response).data.contacts;
+      console.log(data);
+      data.forEach((contact) => {
+        dispatch(
+          addChat({
+            sender: {
+              contact_id: contact.contact.id,
+              contact_name: contact.contact.userLogin,
+              last_online: new Date().toISOString(),
+              unread: 0,
+              status: "offline",
+            },
+            messages: contact.messages,
+          })
+        );
+      });
+    } catch (err) {
+      return null;
+    }
+  }
+);
+
+export const addToContact = createAsyncThunk(
+  "chat/addToContact",
+  async (
+    { toContactUserId, token }: { toContactUserId: number; token: string },
+    { dispatch, rejectWithValue }
+  ) => {
+    try {
+      const response = await axios.post(
+        API_URL + "chat/people/" + toContactUserId,
+        {}, // Empty data since it's a POST request
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data: Array<IContact> = response.data;
+      data.forEach((contact) => {
+        dispatch(
+          addChat({
+            sender: contact,
+            messages: null,
+          })
+        );
+      });
+    } catch (err: any) {
+      rejectWithValue(err.message);
+    }
+  }
+);

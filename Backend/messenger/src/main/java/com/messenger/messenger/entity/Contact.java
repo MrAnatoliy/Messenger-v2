@@ -2,8 +2,6 @@ package com.messenger.messenger.entity;
 
 import java.util.List;
 
-import com.messenger.messenger.domain.User;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Contact {
-    private User contact;
+    private ResponseUser contact;
     private List<ChatMessage> messages;
 }

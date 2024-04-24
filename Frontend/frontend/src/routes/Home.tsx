@@ -2,18 +2,31 @@ import { Grid, useTheme } from "@mui/material";
 import UserCard from "../components/UserCard";
 import ChatBox from "../components/ChatBox";
 import ChatHeader from "../components/ChatHeader";
-import { useAppSelector } from "../store/hooks";
-import { selectActiveChat, selectActivePage } from "../store/chatSlice";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { WSConnectionOpen, selectActiveChat, selectActivePage, selectWSConnection } from "../store/chatSlice";
 import MenuPanel from "../components/MenuPanel";
 import ChatInputField from "../components/ChatInputField";
 import ChatArea from "../components/ChatArea";
 import PeopleBox from "../components/PeopleBox";
 import SettingsBox from "../components/SettingsBox";
+import { useEffect } from "react";
+import { connect, subscribeToMessages } from "../util/WebSocketService";
 
 const Home = () => {
   const activeChat = useAppSelector(selectActiveChat);
   const activePage = useAppSelector(selectActivePage);
+  const WSConnection = useAppSelector(selectWSConnection)
   const theme = useTheme();
+
+  useEffect(() => {
+    if(WSConnection === 'closed'){
+      connect().then(() => {
+        setTimeout(subscribeToMessages,1000)
+      }).catch(error => {
+        console.log('Error to subscribing to messages : ', error)
+      })
+    }
+  }, [WSConnection])
 
   const setActivePage = () => {
     let pageBox;

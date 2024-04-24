@@ -1,6 +1,7 @@
 import { SendRounded } from "@mui/icons-material";
 import { Box, IconButton, TextField } from "@mui/material";
 import React from "react";
+import { subscribeToMessages } from "../util/WebSocketService";
 
 const ChatInputField = () => {
   return (

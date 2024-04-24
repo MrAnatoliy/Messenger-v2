@@ -55,8 +55,8 @@ public class SecurityConfiguration{
                                     .requestMatchers("/api/auth/*").permitAll()
                                     .requestMatchers("/chat-service/**").permitAll()
                                     .requestMatchers("/admin/**").hasRole("ADMIN")
-                                    //.anyRequest().authenticated();
-                                    .anyRequest().permitAll();
+                                    .anyRequest().authenticated();
+                                    //.anyRequest().permitAll();
                         }
                 )
                 .sessionManagement((configurer) -> {
