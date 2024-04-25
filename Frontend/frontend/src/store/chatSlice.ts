@@ -99,6 +99,9 @@ export const chatSlice = createSlice({
         }
       }
     },
+    resetChatSlice : (state) => {
+      return initialState
+    }
   },
 });
 
@@ -111,6 +114,7 @@ export const {
   setActivePage,
   setMyselfContact,
   addChat,
+  resetChatSlice,
 } = chatSlice.actions;
 
 export const selectChats = (state: RootState) => state.chat.chats;

@@ -13,7 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useAppDispatch } from "../store/hooks";
-import { setActivePage } from "../store/chatSlice";
+import { resetChatSlice, setActivePage } from "../store/chatSlice";
 import { logout } from "../store/authSlice";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -132,6 +132,7 @@ const MenuPanel = () => {
             <Button onClick={() => {
               dispatcher(logout())
               navigate("/login")
+              dispatcher(resetChatSlice())
               }} color="primary" variant="contained">Yes</Button>
             <Button onClick={() => {setOpenLogoutDialog(false)}} color="error" variant="contained">No</Button>
           </Box>

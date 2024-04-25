@@ -1,9 +1,15 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { RootState } from "./store";
+import { RootState, store } from "./store";
 import axios from "axios";
 import Cookies from "universal-cookie";
 import { STATUS } from "../util/statuses";
-import { IContact, setMyselfContact } from "./chatSlice";
+import {
+  IChatSlice,
+  IContact,
+  resetChatSlice,
+  selectChats,
+  setMyselfContact,
+} from "./chatSlice";
 
 export interface IAuthSlice {
   user: {
@@ -48,13 +54,16 @@ export const authSlice = createSlice({
     },
     logout: (state) => {
       const cookies = new Cookies();
-      cookies.remove('id')
-      cookies.remove('token')
-      cookies.remove('username')
-      cookies.remove('authorities')
+      cookies.remove("id");
+      cookies.remove("token");
+      cookies.remove("username");
+      cookies.remove("authorities");
+      cookies.remove("myself");
 
       state.loading = "idle";
       state.user = null;
+      state.isLoggedIn = false;
+      state.message = "";
     },
     authSuccess: (state, action: PayloadAction<IAuthResponse>) => {
       state.loading = "succeeded";
@@ -122,14 +131,14 @@ export const authenticate = createAsyncThunk(
           last_online: new Date().toISOString(),
           unread: 0,
           status: "online",
-        }
-        dispatch(setMyselfContact(myself))
+        };
+        dispatch(setMyselfContact(myself));
         const cookies = new Cookies();
-        cookies.set("id", data.id)
+        cookies.set("id", data.id);
         cookies.set("token", data.token);
-        cookies.set("username", data.userLogin)
+        cookies.set("username", data.userLogin);
         cookies.set("authorities", data.roles);
-        cookies.set("myself", myself)
+        cookies.set("myself", myself);
       } else {
         dispatch(authFail(data));
       }
