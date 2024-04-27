@@ -12,7 +12,7 @@ export interface IContact {
 
 export interface IMessage {
   senderId: number;
-  recipientId : number;
+  recipientId: number;
   time: string;
   status: "sended" | "delivered" | "read";
   content: string; //TODO - make a content an object with separate text and files like images/videos/files e.t.c.
@@ -83,6 +83,7 @@ export const chatSlice = createSlice({
       state.myself = action.payload;
     },
     addChat: (state, action: PayloadAction<IChat>) => {
+      /**
       const newChat = action.payload;
       // Check if a chat with the same contact_id already exists
       const existingChatIndex = state.chats?.findIndex(chat => chat.sender.contact_id === newChat.sender.contact_id);
@@ -98,10 +99,31 @@ export const chatSlice = createSlice({
           }
         }
       }
+      */
+
+      const payloadChat = action.payload;
+      if (state.chats) {
+        const chatIndex = state.chats.findIndex(
+          (c) => c.sender.contact_id === payloadChat.sender.contact_id
+        );
+        if (chatIndex === -1) {
+          state.chats.push(payloadChat);
+        } else {
+          state.chats[chatIndex] = payloadChat;
+        }
+
+        const activeChat = state.activeChat;
+        if (activeChat) {
+          const activeChatIndex = state.chats.findIndex(c => c.sender.contact_id === activeChat.sender.contact_id);
+          if(activeChatIndex !== -1){
+            state.activeChat = state.chats[activeChatIndex]
+          }
+        }
+      }
     },
-    resetChatSlice : (state) => {
-      return initialState
-    }
+    resetChatSlice: (state) => {
+      return initialState;
+    },
   },
 });
 
@@ -163,7 +185,18 @@ export const getAllContacts = createAsyncThunk(
         },
       });
       const data: Array<IResponseContact> = (await response).data.contacts;
+      console.log(data);
       data.forEach((contact) => {
+        console.log({
+          sender: {
+            contact_id: contact.contact.id,
+            contact_name: contact.contact.userLogin,
+            last_online: new Date().toISOString(),
+            unread: 0,
+            status: "offline",
+          },
+          messages: contact.messages,
+        });
         dispatch(
           addChat({
             sender: {

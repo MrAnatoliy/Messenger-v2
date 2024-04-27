@@ -96,7 +96,7 @@ public class ChatController {
             chatMessage.getRecipientId().toString(),"/queue/messages",
             new ChatNotification(
                 savedChatMessage.getSender().getId(),
-                savedChatMessage.getSender().getUsername(),
+                savedChatMessage.getSender().getUserLogin(),
                 savedChatMessage.getMessage()
             )
         );
