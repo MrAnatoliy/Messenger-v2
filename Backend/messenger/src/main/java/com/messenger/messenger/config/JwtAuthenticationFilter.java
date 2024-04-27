@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 @Component
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final Logger logger = Logger.getLogger(JwtAuthenticationFilter.class.getName());
 
     @SuppressWarnings("null")
     @Override
@@ -31,10 +33,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
+
+        logger.info("Entering JWTAuthenticationFilter...");
+
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;
         if(authHeader == null || !authHeader.startsWith("Bearer ")){
+
+            logger.info("Auth has not been found...");
+
             filterChain.doFilter(request, response);
             return;
         }
@@ -55,6 +63,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
+        
+
         filterChain.doFilter(request, response);
     }
 }
