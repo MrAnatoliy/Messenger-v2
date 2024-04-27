@@ -14,6 +14,8 @@ import PrivateRoute from "./components/PrivateRoute";
 import { ROLE } from "./util/roles";
 import { light } from "@mui/material/styles/createPalette";
 import { DoNotDisturb } from "@mui/icons-material";
+import { SnackbarProvider } from "notistack";
+import { ChatNotification } from "./components/ChatNotification";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -71,7 +73,7 @@ let theme = createTheme({
             },
             "&.Mui-error input": {
               color: theme.palette.error.main,
-            }
+            },
           },
         }),
       },
@@ -106,7 +108,7 @@ theme = createTheme(theme, {
       name: "invisible",
     }),
   },
-})
+});
 
 const router = createBrowserRouter([
   {
@@ -124,19 +126,34 @@ const router = createBrowserRouter([
   },
   {
     path: "home",
-    element: <PrivateRoute role={ROLE.User}><Home /></PrivateRoute>,
+    element: (
+      <PrivateRoute role={ROLE.User}>
+        <Home />
+      </PrivateRoute>
+    ),
     //element: <Home />
-  }
+  },
 ]);
 
 root.render(
-  <React.StrictMode>
+  //<React.StrictMode>
     <ThemeProvider theme={theme}>
       <Provider store={store}>
-        <RouterProvider router={router} />
+        <SnackbarProvider
+        autoHideDuration={15000}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        Components={{
+          chatNotification: ChatNotification
+        }}
+        >
+          <RouterProvider router={router} />
+        </SnackbarProvider>
       </Provider>
     </ThemeProvider>
-  </React.StrictMode>
+  //</React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

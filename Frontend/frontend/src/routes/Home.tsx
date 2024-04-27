@@ -3,7 +3,12 @@ import UserCard from "../components/UserCard";
 import ChatBox from "../components/ChatBox";
 import ChatHeader from "../components/ChatHeader";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { WSConnectionOpen, selectActiveChat, selectActivePage, selectWSConnection } from "../store/chatSlice";
+import {
+  WSConnectionOpen,
+  selectActiveChat,
+  selectActivePage,
+  selectWSConnection,
+} from "../store/chatSlice";
 import MenuPanel from "../components/MenuPanel";
 import ChatInputField from "../components/ChatInputField";
 import ChatArea from "../components/ChatArea";
@@ -15,18 +20,20 @@ import { connect, subscribeToMessages } from "../util/WebSocketService";
 const Home = () => {
   const activeChat = useAppSelector(selectActiveChat);
   const activePage = useAppSelector(selectActivePage);
-  const WSConnection = useAppSelector(selectWSConnection)
+  const WSConnection = useAppSelector(selectWSConnection);
   const theme = useTheme();
 
   useEffect(() => {
-    if(WSConnection === 'closed'){
-      connect().then(() => {
-        setTimeout(subscribeToMessages,1000)
-      }).catch(error => {
-        console.log('Error to subscribing to messages : ', error)
-      })
+    if (WSConnection === "closed") {
+      connect()
+        .then(() => {
+          setTimeout(subscribeToMessages, 1000);
+        })
+        .catch((error) => {
+          console.log("Error to subscribing to messages : ", error);
+        });
     }
-  }, [WSConnection])
+  }, []);
 
   const setActivePage = () => {
     let pageBox;

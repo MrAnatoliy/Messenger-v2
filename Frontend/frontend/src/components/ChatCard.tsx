@@ -1,7 +1,7 @@
 import default_contact_round from "../static/default_contact_round.png";
 import { IChat, setActiveChat } from "../store/chatSlice";
 import { Box, ListItem, ListItemButton, Typography } from "@mui/material";
-import useWindowDimensions, { useAppDispatch } from "../store/hooks";
+import { useAppDispatch } from "../store/hooks";
 
 interface IChatCard {
   chat: IChat;
@@ -11,7 +11,6 @@ const ChatCard = (props: IChatCard) => {
   let lastMessage, lastMessageTime;
 
   const dispatcher = useAppDispatch();
-  const screenWidth = useWindowDimensions().width;
 
   if (props.chat.messages) {
     const messages = props.chat.messages;
@@ -48,9 +47,14 @@ const ChatCard = (props: IChatCard) => {
         justifyContent: "flex-start",
       }}
     >
-      <ListItemButton sx={{
-        width: "100%",
-      }} onClick={() => dispatcher(setActiveChat(props.chat))}>
+      <ListItemButton
+        sx={{
+          width: "100%",
+        }}
+        onClick={() => {
+          dispatcher(setActiveChat(props.chat));
+        }}
+      >
         <Box
           sx={{
             position: "relative",
